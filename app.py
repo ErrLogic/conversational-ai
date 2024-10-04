@@ -33,7 +33,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         status_code=422,
         content={
             "success": False,
-            "message": "Parameter required"
+            "message": "Parameter required."
         }
     )
 
@@ -44,7 +44,7 @@ async def bad_request_exception_handler(request: Request, exc: HTTPException):
             status_code=400,
             content={
                 "success": False,
-                "message": "Parameter cannot be blank"
+                "message": "Parameter cannot be blank."
             }
         )
     return JSONResponse(
@@ -57,12 +57,12 @@ async def bad_request_exception_handler(request: Request, exc: HTTPException):
 
 async def verify_token(authorization: str = Header(None)):
     if authorization is None:
-        raise HTTPException(status_code=401, detail="Token required")
+        raise HTTPException(status_code=401, detail="Token required.")
     
     verify_token = authorization.split(" ")[1] if " " in authorization else authorization
     
     if verify_token != token:
-        raise HTTPException(status_code=403, detail="Invalid token")
+        raise HTTPException(status_code=403, detail="Invalid token.")
 
 @app.post("/chat")
 async def chat(request: ChatRequest, authorization: str = Header(None)):
@@ -91,5 +91,5 @@ async def chat(request: ChatRequest, authorization: str = Header(None)):
             "message": response
         }
 
-    raise HTTPException(status_code=400, detail="Question is required.")
+    raise HTTPException(status_code=400, detail="Parameter cannot be blank.")
 
