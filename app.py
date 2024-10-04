@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Header
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
@@ -16,6 +16,8 @@ app = FastAPI()
 
 groq_api_key = os.getenv("API_KEY")
 model = os.getenv("LLM_MODEL")
+token = os.getenv("TOKEN")
+
 groq_chat = ChatGroq(groq_api_key=groq_api_key, model_name=model)
 
 system_prompt = 'You are a friendly conversational chatbot'
@@ -53,8 +55,18 @@ async def bad_request_exception_handler(request: Request, exc: HTTPException):
         }
     )
 
+async def verify_token(authorization: str = Header(None)):
+    if authorization is None:
+        raise HTTPException(status_code=401, detail="Token required")
+    
+    verify_token = authorization.split(" ")[1] if " " in authorization else authorization
+    
+    if verify_token != token:
+        raise HTTPException(status_code=403, detail="Invalid token")
+
 @app.post("/chat")
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, authorization: str = Header(None)):
+    await verify_token(authorization)
     user_question = request.question
 
     if user_question:
